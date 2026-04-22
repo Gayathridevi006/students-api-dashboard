@@ -387,10 +387,11 @@ const LS = {
   studentsPath: 'students.studentsPath',
 };
 const cfg = {
-  api:           localStorage.getItem(LS.api)          || 'http://13.233.230.125',
-  tokenPath:     localStorage.getItem(LS.tokenPath)    || '/api/token/',
-  studentsPath:  localStorage.getItem(LS.studentsPath) || '/students/',
+  api: localStorage.getItem(LS.api) || 'http://13.233.230.125',
+  tokenPath: localStorage.getItem(LS.tokenPath) || '/api/login/',
+  studentsPath: localStorage.getItem(LS.studentsPath) || '/api/students/',
 };
+
 let token = localStorage.getItem(LS.token) || null;
 let currentUser = localStorage.getItem(LS.user) || null;
 let allStudents = [];
