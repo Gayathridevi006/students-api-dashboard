@@ -302,7 +302,7 @@
         <div class="config-body">
           <div class="field" style="margin:0">
             <label>API base URL</label>
-            <input class="input" id="apiBase" value="http://13.233.230.125" placeholder="http://your-ec2-ip:8000" />
+            <input class="input" id="apiBase" value="http://13.233.230.125:8000" placeholder="http://your-ec2-ip:8000" />
           </div>
           <div class="field" style="margin:0">
             <label>Token endpoint</label>
@@ -387,7 +387,7 @@ const LS = {
   studentsPath: 'students.studentsPath',
 };
 const cfg = {
-  api: localStorage.getItem(LS.api) || 'http://13.233.230.125',
+  api: localStorage.getItem(LS.api) || 'http://13.233.230.125:8000',
   tokenPath: localStorage.getItem(LS.tokenPath) || '/login/',
   studentsPath: localStorage.getItem(LS.studentsPath) || '/students/',
 };
