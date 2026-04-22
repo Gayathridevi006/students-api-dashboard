@@ -1,7 +1,6 @@
 from django.db import models
 
-def list(self, request, *args, **kwargs):
-    return super().list(request, *args, **kwargs)
+
 class Student(models.Model):
     """
     Schema — 6 columns:

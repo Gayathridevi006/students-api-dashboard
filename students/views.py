@@ -51,7 +51,7 @@ class StudentListCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response({
             'count': queryset.count(),
-            'data': serializer.data
+            'results': serializer.data   # ✅ FIX HERE
         })
 
     def create(self, request, *args, **kwargs):
