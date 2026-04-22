@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Students API — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@700;800&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f4f6fb;
+    --card:      #ffffff;
+    --border:    #e2e6f0;
+    --accent:    #4f46e5;
+    --accent-h:  #4338ca;
+    --accent-bg: #eef2ff;
+    --text:      #1e2235;
+    --muted:     #6b7280;
+    --error:     #dc2626;
+    --error-bg:  #fef2f2;
+    --success:   #059669;
+    --success-bg:#ecfdf5;
+    --input-bg:  #f8fafc;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(79,70,229,0.07) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(79,70,229,0.05) 0%, transparent 50%);
+  }
+
+  .wrapper {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  /* ── Brand ── */
+  .brand {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .brand-icon {
+    width: 52px; height: 52px;
+    background: var(--accent);
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+  }
+  .brand-icon svg { width: 26px; height: 26px; fill: #fff; }
+  .brand h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .brand p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  /* ── User selector ── */
+  .user-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .user-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--input-bg);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .user-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+  .user-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+  }
+  .user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    color: #fff;
+  }
+  .user-info { min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--muted); }
+
+  /* ── Divider ── */
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 20px 0;
+    font-size: 12px; color: var(--muted);
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── Fields ── */
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .input-wrap { position: relative; }
+  .input-wrap input {
+    width: 100%;
+    padding: 11px 40px 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--input-bg);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+    background: #fff;
+  }
+  .input-wrap input.has-error { border-color: var(--error); }
+  .input-icon {
+    position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); pointer-events: none;
+  }
+  .toggle-pass {
+    position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    padding: 2px; display: flex; align-items: center;
+  }
+  .toggle-pass:hover { color: var(--accent); }
+
+  /* ── Error banner ── */
+  .error-banner {
+    display: none;
+    background: var(--error-bg);
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 13px;
+    color: var(--error);
+    margin-bottom: 16px;
+    align-items: center;
+    gap: 8px;
+  }
+  .error-banner.show { display: flex; }
+
+  /* ── Submit button ── */
+  .btn-submit {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 4px;
+  }
+  .btn-submit:hover { background: var(--accent-h); box-shadow: 0 4px 14px rgba(79,70,229,0.35); }
+  .btn-submit:active { transform: scale(0.99); }
+  .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; }
+  .spinner {
+    display: none;
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.65s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Success state ── */
+  .success-card {
+    display: none;
+    background: var(--success-bg);
+    border: 1px solid #a7f3d0;
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    margin-top: 16px;
+  }
+  .success-card.show { display: block; }
+  .success-icon {
+    width: 48px; height: 48px;
+    background: var(--success);
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .success-icon svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .success-card h3 { font-size: 16px; font-weight: 600; color: #065f46; margin-bottom: 4px; }
+  .success-card p { font-size: 13px; color: #047857; }
+  .token-box {
+    background: #fff;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 14px;
+    font-family: 'Inter', monospace;
+    font-size: 11px;
+    color: #064e3b;
+    word-break: break-all;
+    text-align: left;
+  }
+  .token-label { font-size: 11px; color: #059669; font-weight: 600; margin-bottom: 4px; }
+  .copy-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; margin-top: 10px; padding: 8px;
+    background: var(--success); color: #fff;
+    border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .copy-btn:hover { opacity: 0.88; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── Config panel ── */
+  .config-toggle {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted); background: none; border: none;
+    cursor: pointer; width: 100%; justify-content: center; margin-top: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+  .config-toggle:hover { color: var(--accent); }
+  .config-panel {
+    display: none;
+    margin-top: 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .config-panel.open { display: block; }
+  .config-panel label { font-size: 12px; color: var(--muted); margin-bottom: 5px; display: block; }
+  .config-panel input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+  }
+  .config-panel input:focus { border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- Brand -->
+  <div class="brand">
+    <div class="brand-icon">
+      <!-- Graduation cap icon -->
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3L2 8l10 5 10-5-10-5zM2 13l10 5 10-5M2 18l10 5 10-5"/>
+      </svg>
+    </div>
+    <h1>Students Portal</h1>
+    <p>Sign in to access the API dashboard</p>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- Quick-select users -->
+    <p style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">Quick select</p>
+    <div class="user-selector" id="userSelector">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="divider">or enter manually</div>
+
+    <!-- Error -->
+    <div class="error-banner" id="errorBanner">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="errorText">Invalid credentials</span>
+    </div>
+
+    <!-- Fields -->
+    <div class="field">
+      <label for="username">Username</label>
+      <div class="input-wrap">
+        <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
+        <span class="input-icon">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
+        <button class="toggle-pass" type="button" onclick="togglePass()" title="Show/hide password">
+          <svg id="eyeIcon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+      <span id="btnText">Sign In</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+
+    <!-- Success -->
+    <div class="success-card" id="successCard">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>Logged in successfully!</h3>
+      <p id="successUser">Welcome back, admin</p>
+      <div class="token-box">
+        <div class="token-label">Access Token</div>
+        <div id="tokenVal">—</div>
+      </div>
+      <button class="copy-btn" onclick="copyToken()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span id="copyText">Copy Token</span>
+      </button>
+    </div>
+
+    <!-- Settings toggle -->
+    <button class="config-toggle" onclick="toggleConfig()">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M12 2v2M4.93 4.93l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M12 20v2m5.66-2.34l-1.41-1.41"/></svg>
+      API settings
+    </button>
+    <div class="config-panel" id="configPanel">
+      <label>API Base URL</label>
+      <input type="text" id="apiBase" value="http://127.0.0.1:8000" placeholder="http://your-ec2-ip:8000" />
+    </div>
+  </div>
+
+  <div class="footer">
+    Students Portal · For internal team use only
+  </div>
+</div>
+
+<script>
+// ── Team users — EDIT THIS LIST to add/remove team members ──────────
+// Each entry: { label, username, password, role, color }
+const TEAM_USERS = [
+  { label: 'Admin',      username: 'admin',   password: 'admin123', role: 'Full access',    color: '#4f46e5' },
+  { label: 'Teacher',    username: 'teacher', password: 'teach456', role: 'Read & manage',  color: '#0891b2' },
+  // Add more users here:
+  // { label: 'Reviewer', username: 'reviewer', password: 'rev789', role: 'Read only', color: '#059669' },
+];
+
+// ── Render user buttons ─────────────────────────────────────────────
+function initUserButtons() {
+  const container = document.getElementById('userSelector');
+  container.innerHTML = TEAM_USERS.map((u, i) => `
+    <button class="user-btn" onclick="selectUser(${i})" id="ubtn-${i}">
+      <div class="user-avatar" style="background:${u.color}">${u.label.slice(0,2).toUpperCase()}</div>
+      <div class="user-info">
+        <div class="user-name">${u.label}</div>
+        <div class="user-role">${u.role}</div>
+      </div>
+    </button>`).join('');
+}
+
+function selectUser(idx) {
+  const u = TEAM_USERS[idx];
+  document.getElementById('username').value = u.username;
+  document.getElementById('password').value = u.password;
+  document.querySelectorAll('.user-btn').forEach((b, i) => b.classList.toggle('selected', i === idx));
+  hideError();
+  document.getElementById('successCard').classList.remove('show');
+}
+
+// ── Toggle password visibility ──────────────────────────────────────
+function togglePass() {
+  const inp = document.getElementById('password');
+  const eye = document.getElementById('eyeIcon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    eye.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+  } else {
+    inp.type = 'password';
+    eye.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  }
+}
+
+// ── API config ──────────────────────────────────────────────────────
+function apiBase() {
+  return (document.getElementById('apiBase').value || 'http://127.0.0.1:8000').replace(/\/$/, '');
+}
+
+function toggleConfig() {
+  document.getElementById('configPanel').classList.toggle('open');
+}
+
+// ── Error helpers ───────────────────────────────────────────────────
+function showError(msg) {
+  const b = document.getElementById('errorBanner');
+  document.getElementById('errorText').textContent = msg;
+  b.classList.add('show');
+  document.getElementById('username').classList.add('has-error');
+  document.getElementById('password').classList.add('has-error');
+}
+function hideError() {
+  document.getElementById('errorBanner').classList.remove('show');
+  document.getElementById('username').classList.remove('has-error');
+  document.getElementById('password').classList.remove('has-error');
+}
+
+// ── Login ───────────────────────────────────────────────────────────
+async function doLogin() {
+  hideError();
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  if (!username || !password) {
+    showError('Please enter your username and password.');
+    return;
+  }
+
+  // Loading state
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  document.getElementById('btnText').textContent = 'Signing in…';
+  document.getElementById('spinner').style.display = 'block';
+  document.getElementById('successCard').classList.remove('show');
+
+  try {
+    const res = await fetch(apiBase() + '/api/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      const msg = data?.detail || data?.error || data?.non_field_errors?.[0] || 'Invalid credentials. Please try again.';
+      showError(msg);
+      return;
+    }
+
+    // Success — simplejwt returns { access, refresh }
+    const token = data.access || data.token;
+    document.getElementById('tokenVal').textContent = token || '(no token returned)';
+    document.getElementById('successUser').textContent = `Welcome, ${username}`;
+    document.getElementById('successCard').classList.add('show');
+
+    // Store in sessionStorage for use in other pages
+    if (token) sessionStorage.setItem('students_api_token', token);
+
+  } catch (err) {
+    showError('Could not connect to API. Check the base URL in settings.');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('btnText').textContent = 'Sign In';
+    document.getElementById('spinner').style.display = 'none';
+  }
+}
+
+// ── Copy token ──────────────────────────────────────────────────────
+async function copyToken() {
+  const t = document.getElementById('tokenVal').textContent;
+  await navigator.clipboard.writeText(t);
+  const btn = document.getElementById('copyText');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy Token', 2000);
+}
+
+// ── Enter key support ───────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ── Init ─────────────────────────────────────────────────────────────
+initUserButtons();
+</script>
+</body>
+</html>

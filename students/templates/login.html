@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Students API Dashboard</title>
+
+<style>
+body { font-family: Arial; padding: 20px; background:#f4f6fb; }
+input, button { margin:5px; padding:8px; }
+button { cursor:pointer; }
+#dashboard { display:none; margin-top:20px; }
+table { width:100%; border-collapse: collapse; margin-top:10px;}
+th, td { border:1px solid #ccc; padding:8px; text-align:left; }
+.success { color: green; margin-top:10px; }
+.error { color: red; margin-top:10px; }
+</style>
+
+</head>
+<body>
+
+<h2>Login</h2>
+
+<input id="username" placeholder="Username" />
+<input id="password" type="password" placeholder="Password" />
+<button onclick="login()">Login</button>
+
+<div id="message"></div>
+
+<hr/>
+
+<div id="dashboard">
+
+<h3>Students Dashboard</h3>
+
+<!-- CREATE -->
+
+<h4>Add Student</h4>
+<input id="name" placeholder="Name" />
+<input id="age" placeholder="Age" />
+<input id="grade" placeholder="Grade" />
+<input id="email" placeholder="Email" />
+<button onclick="createStudent()">Add</button>
+
+<hr/>
+
+<!-- READ -->
+
+<button onclick="getStudents()">Load Students</button>
+
+<table>
+<thead>
+<tr>
+<th>ID</th><th>Name</th><th>Age</th><th>Grade</th><th>Email</th><th>Actions</th>
+</tr>
+</thead>
+<tbody id="studentsTable"></tbody>
+</table>
+
+</div>
+
+<script>
+
+const BASE_URL = "http://127.0.0.1:8000";
+
+// ================= LOGIN =================
+async function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  const res = await fetch(BASE_URL + "/login/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    localStorage.setItem("token", data.access);
+    document.getElementById("message").innerHTML =
+      "<p class='success'>Login successful</p>";
+
+    document.getElementById("dashboard").style.display = "block";
+  } else {
+    document.getElementById("message").innerHTML =
+      "<p class='error'>Login failed</p>";
+  }
+}
+
+// ================= GET =================
+async function getStudents() {
+  const res = await fetch(BASE_URL + "/api/students/", {
+    headers: {
+      "Authorization": "Bearer " + localStorage.getItem("token")
+    }
+  });
+
+  const data = await res.json();
+  const table = document.getElementById("studentsTable");
+  table.innerHTML = "";
+
+  data.data.forEach(s => {
+    table.innerHTML += `
+      <tr>
+        <td>${s.id}</td>
+        <td>${s.name}</td>
+        <td>${s.age}</td>
+        <td>${s.grade}</td>
+        <td>${s.email}</td>
+        <td>
+          <button onclick="deleteStudent(${s.id})">Delete</button>
+          <button onclick="updateStudent(${s.id})">Update</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+// ================= CREATE =================
+async function createStudent() {
+  const body = {
+    name: document.getElementById("name").value,
+    age: parseInt(document.getElementById("age").value),
+    grade: document.getElementById("grade").value,
+    email: document.getElementById("email").value
+  };
+
+  await fetch(BASE_URL + "/api/students/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + localStorage.getItem("token")
+    },
+    body: JSON.stringify(body)
+  });
+
+  getStudents();
+}
+
+// ================= DELETE =================
+async function deleteStudent(id) {
+  await fetch(BASE_URL + "/api/students/" + id + "/", {
+    method: "DELETE",
+    headers: {
+      "Authorization": "Bearer " + localStorage.getItem("token")
+    }
+  });
+
+  getStudents();
+}
+
+// ================= UPDATE =================
+async function updateStudent(id) {
+  const newName = prompt("Enter new name");
+
+  await fetch(BASE_URL + "/api/students/" + id + "/", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + localStorage.getItem("token")
+    },
+    body: JSON.stringify({
+      name: newName,
+      age: 20,
+      grade: "10A",
+      email: "updated@email.com"
+    })
+  });
+
+  getStudents();
+}
+
+</script>
+
+</body>
+</html>
