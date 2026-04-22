@@ -388,10 +388,9 @@ const LS = {
 };
 const cfg = {
   api: localStorage.getItem(LS.api) || 'http://13.233.230.125',
-  tokenPath: localStorage.getItem(LS.tokenPath) || '/api/login/',
-  studentsPath: localStorage.getItem(LS.studentsPath) || '/api/students/',
+  tokenPath: localStorage.getItem(LS.tokenPath) || '/login/',
+  studentsPath: localStorage.getItem(LS.studentsPath) || '/students/',
 };
-
 let token = localStorage.getItem(LS.token) || null;
 let currentUser = localStorage.getItem(LS.user) || null;
 let allStudents = [];
@@ -491,17 +490,10 @@ function enterDashboard() {
 async function loadStudents() {
   try {
     const data = await api('GET', cfg.studentsPath);
-
-    console.log("API response:", data); // debug
-
-    allStudents = Array.isArray(data)
-      ? data
-      : (data.data || data.results || []);
-
+    // Support both paginated ({results: [...]}) and plain array responses.
+    allStudents = Array.isArray(data) ? data : (data.results || []);
     render();
-  } catch (e) {
-    toast(e.message, 'error');
-  }
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 async function createStudent() {
