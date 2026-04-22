@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Student
 from .serializers import StudentSerializer
+from rest_framework.permissions import AllowAny
+
 
 
 from django.shortcuts import render
@@ -42,7 +44,7 @@ class StudentListCreateView(generics.ListCreateAPIView):
     """
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -72,7 +74,7 @@ class StudentDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
